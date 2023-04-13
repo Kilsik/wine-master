@@ -27,6 +27,29 @@ def change_the_word(years):
 def get_wines(file_name):
     ''' Из файла Excel получаем словарь с винами '''
 
+    excel_wines = pandas.read_excel(file_name, na_filter=False)
+    wines = excel_wines.to_dict('records')
+    categories_header = excel_wines.columns[0]
+    categories = excel_wines.agg(list,
+        axis=0)[categories_header].drop_duplicates()
+    return categories, wines, categories_header
+
+
+def sort_by_categories(categories, wines, categories_header):
+    ''' Сортируем вина по категориям '''
+
+    wines_by_category = collections.defaultdict(list)
+    for category in categories:
+        for wine in wines:
+            temporary = wines_by_category[category]
+            if wine[categories_header] == category:
+                temporary.append(wine)
+    return wines_by_category
+
+
+def replace_keys(categories, wines):
+    ''' Меняем названия ключей словаря на латинские '''
+
     keys_replacements = {"Название": "wine_name",
                         "Сорт": "grape",
                         "Цена": "price",
@@ -34,24 +57,13 @@ def get_wines(file_name):
                         "Категория": "category",
                         "Акция": "special_offer"}
 
-    excel_wines = pandas.read_excel(file_name, na_filter=False)
-    wines = excel_wines.to_dict('records')
-    categories_header = excel_wines.columns[0]
-    categories = excel_wines.agg(list,
-        axis=0)[categories_header].drop_duplicates()
-    wines_by_category = collections.defaultdict(list)
     for category in categories:
-        for wine in wines:
-            temporary = wines_by_category[category]
-            if wine[categories_header] == category:
-                temporary.append(wine)
-    for category in categories:
-        for wine in wines_by_category[category]:
+        for wine in wines[category]:
             for i in list(wine):
                 if i in keys_replacements:
                     wine[keys_replacements[i]] = wine[i]
                     del wine[i]
-    return wines_by_category, categories
+    return wines_by_category
 
 
 if __name__ == '__main__':
@@ -74,11 +86,14 @@ if __name__ == '__main__':
     foundation = 1920
     years = datetime.datetime.now().year - foundation
 
-    wines_by_category, categories = get_wines(file_path)
+    categories, wines, categories_header = get_wines(file_path)
+    wines_by_category = sort_by_categories(categories, wines,
+        categories_header)
+    wines_with_lain_keys = replace_keys(categories, wines_by_category)
 
     rendered_page = template.render(
         winerys_age=change_the_word(years),
-        wines_by_category=wines_by_category,
+        wines_by_category=wines_with_lain_keys,
         categories=categories,
     )
 
