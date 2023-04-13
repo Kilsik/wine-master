@@ -1,9 +1,12 @@
 import datetime
 import collections
+import argparse
+import os
 
 import pandas
 
 from http.server import HTTPServer, SimpleHTTPRequestHandler
+from dotenv import load_dotenv
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 
@@ -56,13 +59,22 @@ if __name__ == '__main__':
         loader=FileSystemLoader('.'),
         autoescape=select_autoescape(['html', 'xml'])
     )
+    parser = argparse.ArgumentParser(description='Сайт магазина вин')
+    parser.add_argument('-f', '--file_path', help='Путь к файлу\
+         с товарами')
+    args = parser.parse_args()
+    if args.file_path:
+        file_path = args.file_path
+    else:
+        load_dotenv()
+        file_path = os.getenv('FILE', 'assets/wine.xlsx')
 
     template = env.get_template('template.html')
 
     foundation = 1920
     years = datetime.datetime.now().year - foundation
 
-    wines_by_category, categories = get_wines('assets/wine.xlsx')
+    wines_by_category, categories = get_wines(file_path)
 
     rendered_page = template.render(
         winerys_age=change_the_word(years),
