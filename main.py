@@ -17,7 +17,7 @@ def change_the_word(years):
         word = 'лет'
     elif (years % 10) == 1:
         word = 'год'
-    elif 2 <= (years % 100) <= 4:
+    elif 2 <= (years % 10) <= 4:
         word = 'года'
     else:
         word = 'лет'
