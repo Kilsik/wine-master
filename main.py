@@ -56,14 +56,15 @@ def replace_keys(categories, wines):
                         "Картинка": "img_url",
                         "Категория": "category",
                         "Акция": "special_offer"}
-
+    wines_with_latin_keys = collections.defaultdict(list)
     for category in categories:
         for wine in wines[category]:
-            for i in list(wine):
-                if i in keys_replacements:
-                    wine[keys_replacements[i]] = wine[i]
-                    del wine[i]
-    return wines_by_category
+            temp_wine = dict()
+            for key_ in list(wine):
+                if key_ in keys_replacements:
+                    temp_wine[keys_replacements[key_]] = wine[key_]
+            wines_with_latin_keys[category].append(temp_wine)
+    return wines_with_latin_keys
 
 
 if __name__ == '__main__':
@@ -89,11 +90,11 @@ if __name__ == '__main__':
     categories, wines, categories_header = get_wines(file_path)
     wines_by_category = sort_by_categories(categories, wines,
         categories_header)
-    wines_with_lain_keys = replace_keys(categories, wines_by_category)
+    wines_with_latin_keys = replace_keys(categories, wines_by_category)
 
     rendered_page = template.render(
-        winerys_age=change_the_word(years),
-        wines_by_category=wines_with_lain_keys,
+        winery_age=change_the_word(years),
+        wines_by_category=wines_with_latin_keys,
         categories=categories,
     )
 
