@@ -50,19 +50,12 @@ def sort_by_categories(categories, wines, categories_header):
 def replace_keys(categories, wines):
     ''' Меняем названия ключей словаря на латинские '''
 
-    keys_replacements = {"Название": "wine_name",
-                        "Сорт": "grape",
-                        "Цена": "price",
-                        "Картинка": "img_url",
-                        "Категория": "category",
-                        "Акция": "special_offer"}
+    keys_replacements = ["category", "wine_name", "grape", "price", "img_url",
+                        "special_offer"]
     wines_with_latin_keys = collections.defaultdict(list)
     for category in categories:
         for wine in wines[category]:
-            temp_wine = dict()
-            for key_ in list(wine):
-                if key_ in keys_replacements:
-                    temp_wine[keys_replacements[key_]] = wine[key_]
+            temp_wine = dict(zip(keys_replacements, wine.values()))
             wines_with_latin_keys[category].append(temp_wine)
     return wines_with_latin_keys
 
